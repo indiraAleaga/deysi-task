@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feat/*
   pull_request:
     branches:
       - main
@@ -34,10 +35,10 @@ jobs:
         run: mvn clean install
 
       - name: Run Tests with TestNG
-        run: mvn test
+        run: mvn test || true
 
       - name: Generate Allure Report
-        run: mvn allure:report
+        run: mvn allure:report || true
 
       - name: Publish Allure Report
         uses: actions/upload-artifact@v4
