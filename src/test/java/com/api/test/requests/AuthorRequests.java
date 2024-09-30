@@ -13,29 +13,29 @@ public class AuthorRequests {
     return given().when().get(AUTHORS_URL);
   }
 
-  public Response getAuthorById(int bookId) {
+  public Response getAuthorById(Object authorId) {
     return given()
         .contentType(ContentType.JSON)
         .when()
-        .get(String.format("%s/%s", AUTHORS_URL, bookId));
+        .get(String.format("%s/%s", AUTHORS_URL, authorId));
   }
 
   public Response createAuthor(String jsonPayload) {
     return given().contentType(ContentType.JSON).body(jsonPayload).when().post(AUTHORS_URL);
   }
 
-  public Response updateAuthor(int bookId, String jsonPayload) {
+  public Response updateAuthor(Object authorId, String jsonPayload) {
     return given()
         .contentType(ContentType.JSON)
         .body(jsonPayload)
         .when()
-        .put(String.format("%s/%s", AUTHORS_URL, bookId));
+        .put(String.format("%s/%s", AUTHORS_URL, authorId));
   }
 
-  public Response deleteAuthor(int bookId) {
+  public Response deleteAuthor(Object authorId) {
     return given()
         .contentType(ContentType.JSON)
         .when()
-        .delete(String.format("%s/%s", AUTHORS_URL, bookId));
+        .delete(String.format("%s/%s", AUTHORS_URL, authorId));
   }
 }

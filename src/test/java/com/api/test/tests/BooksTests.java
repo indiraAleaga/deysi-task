@@ -1,23 +1,22 @@
 package com.api.test.tests;
 
+import static com.api.test.constants.ApiTestsConstants.INVALID_ID_DATA_TYPE;
+import static com.api.test.constants.ApiTestsConstants.NON_EXISTENT_ID;
+import static org.testng.Assert.*;
+
 import com.api.test.data_provider.DataProviderClass;
 import com.api.test.models.Book;
 import com.api.test.repository.BooksRepository;
 import com.api.test.requests.BooksRequests;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import java.util.Date;
-import java.util.Random;
 import org.apache.http.HttpStatus;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class BooksTests extends BaseApiTest {
 
-  Gson gson = new GsonBuilder().setPrettyPrinting().create();
   private BooksRequests booksRequests;
   private BooksRepository bookRepository;
   private Book expectedBook;
@@ -35,9 +34,7 @@ public class BooksTests extends BaseApiTest {
   public void testGetAllBooks() {
     Response response =
         booksRequests.getAllBooks().then().statusCode(HttpStatus.SC_OK).extract().response();
-
-    Assert.assertFalse(
-        response.jsonPath().getList("id").isEmpty(), "Books list should not be empty");
+    assertFalse(response.jsonPath().getList("id").isEmpty(), "Books list should not be empty");
   }
 
   @Test(description = "Get a book by ID")
@@ -50,41 +47,86 @@ public class BooksTests extends BaseApiTest {
             .extract()
             .response()
             .as(Book.class);
-    Assert.assertNotNull(expectedBook, "Book not found in repository");
-    Assert.assertEquals(responseBook.getId(), expectedBook.getId());
-    Assert.assertEquals(responseBook.getTitle(), expectedBook.getTitle());
-    Assert.assertFalse(responseBook.getDescription().isEmpty());
-    Assert.assertEquals(responseBook.getPageCount(), expectedBook.getPageCount());
-    Assert.assertFalse(responseBook.getExcerpt().isEmpty());
-    Assert.assertFalse(responseBook.getPublishDate().isEmpty());
+    assertNotNull(responseBook, "Book not found in repository");
+    assertEquals(
+        responseBook.getId(),
+        expectedBook.getId(),
+        String.format(
+            "The expected book id is [%s], but we got [%s]",
+            expectedBook.getId(), responseBook.getId()));
+    assertEquals(
+        responseBook.getTitle(),
+        expectedBook.getTitle(),
+        String.format(
+            "The expected title id is [%s], but we got [%s]",
+            expectedBook.getTitle(), responseBook.getTitle()));
+    assertFalse(responseBook.getDescription().isEmpty(), "Book description should not be empty");
+    assertEquals(
+        responseBook.getPageCount(),
+        expectedBook.getPageCount(),
+        String.format(
+            "The expected page count id is [%s], but we got [%s]",
+            expectedBook.getPageCount(), responseBook.getPageCount()));
+    assertFalse(responseBook.getExcerpt().isEmpty(), "Excerpt should not be empty");
+    assertFalse(responseBook.getPublishDate().isEmpty(), "Publish date should not be empty");
   }
 
-  @Test(description = "Get a book by ID not found")
+  @Test(description = "Get a book by NON-Existent ID")
   public void testGetBookByIdNotFound() {
-    Random random = new Random();
-    int bookId = random.nextInt(10000);
-    booksRequests.getBookById(bookId).then().statusCode(HttpStatus.SC_NOT_FOUND);
+    Response response =
+        booksRequests
+            .getBookById(NON_EXISTENT_ID)
+            .then()
+            .statusCode(HttpStatus.SC_NOT_FOUND)
+            .extract()
+            .response();
+    verifyError.verifyErrorNotFound(response);
   }
 
-  @Test(description = "Create a valid book")
+  @Test(description = "Get a book by invalid ID data ype")
+  public void testGetBookByInvalidIdDataType() {
+    Response response =
+        booksRequests
+            .getBookById(INVALID_ID_DATA_TYPE)
+            .then()
+            .statusCode(HttpStatus.SC_BAD_REQUEST)
+            .extract()
+            .response();
+    verifyError.verifyErrorInvalidIdType(response, INVALID_ID_DATA_TYPE);
+  }
+
+  @Test(description = "Create a Book with valid data")
   public void testCreateBookValid() {
     Book newBook = bookRepository.getFakeNewBook();
     String newBookJson = gson.toJson(newBook);
     Response response = booksRequests.createBook(newBookJson).then().extract().response();
 
-    Assert.assertEquals(response.statusCode(), HttpStatus.SC_OK); // HTTP 201 Created
-    Assert.assertNotNull(response.jsonPath().getString("id"));
+    assertEquals(response.statusCode(), HttpStatus.SC_OK); // HTTP 201 Created
+    assertNotNull(response.jsonPath().getString("id"), "The bookId should not be empty");
+
     Book createdBook = response.as(Book.class);
-    Book responseBook =
-        booksRequests
-            .getBookById((Integer) createdBook.getId())
-            .then()
-            .statusCode(HttpStatus.SC_OK)
-            .extract()
-            .response()
-            .as(Book.class);
-    Assert.assertNotNull(responseBook, "Book not found in repository");
-    Assert.assertEquals(responseBook.getId(), createdBook.getId());
+    assertNotNull(createdBook, "Book not found in repository");
+    assertEquals(
+        createdBook.getId(),
+        expectedBook.getId(),
+        String.format(
+            "The expected book id is [%s], but we got [%s]",
+            expectedBook.getId(), createdBook.getId()));
+    assertEquals(
+        createdBook.getTitle(),
+        expectedBook.getTitle(),
+        String.format(
+            "The expected title id is [%s], but we got [%s]",
+            expectedBook.getTitle(), createdBook.getTitle()));
+    assertFalse(createdBook.getDescription().isEmpty(), "Book description should not be empty");
+    assertEquals(
+        createdBook.getPageCount(),
+        expectedBook.getPageCount(),
+        String.format(
+            "The expected page count id is [%s], but we got [%s]",
+            expectedBook.getPageCount(), createdBook.getPageCount()));
+    assertFalse(createdBook.getExcerpt().isEmpty(), "Excerpt should not be empty");
+    assertFalse(createdBook.getPublishDate().isEmpty(), "Publish date should not be empty");
   }
 
   @Test(description = "Create a book with duplicated ID")
@@ -96,7 +138,7 @@ public class BooksTests extends BaseApiTest {
     String newBookJson = gson.toJson(newBook);
     Response response = booksRequests.createBook(newBookJson).then().extract().response();
 
-    Assert.assertEquals(response.statusCode(), HttpStatus.SC_BAD_REQUEST);
+    assertEquals(response.statusCode(), HttpStatus.SC_BAD_REQUEST);
   }
 
   @Test(description = "Create a book invalid date format")
@@ -114,19 +156,13 @@ public class BooksTests extends BaseApiTest {
             .extract()
             .response();
 
-    Assert.assertEquals(
-        response.jsonPath().getString("title"), "One or more validation errors occurred.");
-    Assert.assertNotNull(response.jsonPath().get("traceId"));
-    Assert.assertTrue(
-        response.jsonPath().getMap("errors").containsKey("$.publishDate"),
-        "Error key for pageCount is missing");
-    String errorMessage = response.jsonPath().getString("errors.'$.publishDate'[0]");
-    Assert.assertTrue(
-        errorMessage.contains("The JSON value could not be converted to System.DateTime"),
-        "Expected error message is missing or incorrect");
+    verifyError.verifyErrorInvalidDateFormat(response);
   }
 
-  @Test(dataProvider = "pageCountProvider", dataProviderClass = DataProviderClass.class)
+  @Test(
+      description = "Create a Book with different values for page count",
+      dataProvider = "pageCountProvider",
+      dataProviderClass = DataProviderClass.class)
   public void testCreateBookWithPageCount(
       Object pageCount, int expectedStatus, String description) {
     Book newBook = bookRepository.getFakeNewBook();
@@ -134,7 +170,7 @@ public class BooksTests extends BaseApiTest {
     String newBookJson = gson.toJson(newBook);
     Response response = booksRequests.createBook(newBookJson).then().extract().response();
 
-    Assert.assertEquals(
+    assertEquals(
         response.statusCode(),
         expectedStatus,
         " Failed: Expected status "
@@ -144,28 +180,90 @@ public class BooksTests extends BaseApiTest {
             + ". Description: "
             + description);
     if (expectedStatus == HttpStatus.SC_BAD_REQUEST) {
-      Assert.assertEquals(
-          response.jsonPath().getString("title"), "One or more validation errors occurred.");
-      Assert.assertNotNull(response.jsonPath().get("traceId"));
-      Assert.assertTrue(
-          response.jsonPath().getMap("errors").containsKey("$.pageCount"),
-          "Error key for pageCount is missing");
-      String errorMessage = response.jsonPath().getString("errors.'$.pageCount'[0]");
-      Assert.assertTrue(
-          errorMessage.contains("The JSON value could not be converted to System.Int32"),
-          "Expected error message is missing or incorrect");
+      verifyError.verifyErrorInvalidPageCount(response);
+
     } else {
-      Assert.assertEquals(response.jsonPath().getInt("pageCount"), (Integer) pageCount);
+      assertEquals(response.jsonPath().getInt("pageCount"), (Integer) pageCount);
     }
   }
 
-  @Test(description = "Delete book")
-  public void testDeleteBookByID() {
-    booksRequests.deleteBook((Integer) expectedBook.getId()).then().statusCode(HttpStatus.SC_OK);
+  @Test(description = "Update Book with valid data")
+  public void testUpdateBook() {
+    Book newBook = bookRepository.getFakeNewBook();
+    newBook.setId(expectedBook.getId());
+    String newBookJson = gson.toJson(newBook);
+    Book updatedBook =
+        booksRequests
+            .updateBook(newBook.getId(), newBookJson)
+            .then()
+            .extract()
+            .response()
+            .as(Book.class);
+
+    assertNotNull(updatedBook, "Book not found in repository");
+    assertEquals(
+        updatedBook.getId(),
+        newBook.getId(),
+        String.format(
+            "The expected book id is [%s], but we got [%s]", newBook.getId(), updatedBook.getId()));
+    assertEquals(
+        updatedBook.getTitle(),
+        newBook.getTitle(),
+        String.format(
+            "The expected title id is [%s], but we got [%s]",
+            newBook.getTitle(), updatedBook.getTitle()));
+    assertFalse(updatedBook.getDescription().isEmpty(), "Book description should not be empty");
+    assertEquals(
+        updatedBook.getPageCount(),
+        newBook.getPageCount(),
+        String.format(
+            "The expected page count id is [%s], but we got [%s]",
+            newBook.getPageCount(), updatedBook.getPageCount()));
+    assertFalse(updatedBook.getExcerpt().isEmpty(), "Excerpt should not be empty");
+    assertFalse(updatedBook.getPublishDate().isEmpty(), "Publish date should not be empty");
+  }
+
+  @Test(description = "Update Book with NON-Existent ID")
+  public void testUpdateBookNonExistentID() {
+    Book newBook = bookRepository.getFakeNewBook();
+    String newBookJson = gson.toJson(newBook);
+    Response response =
+        booksRequests
+            .updateBook(NON_EXISTENT_ID, newBookJson)
+            .then()
+            .statusCode(HttpStatus.SC_NOT_FOUND)
+            .extract()
+            .response();
+    verifyError.verifyErrorNotFound(response);
+  }
+
+  @Test(description = "Update Book with invalid Data type ID")
+  public void testUpdateBookInvalidDataTypeID() {
+    Book newBook = bookRepository.getFakeNewBook();
+    String newBookJson = gson.toJson(newBook);
+    Response response =
+        booksRequests
+            .updateBook(INVALID_ID_DATA_TYPE, newBookJson)
+            .then()
+            .statusCode(HttpStatus.SC_BAD_REQUEST)
+            .extract()
+            .response();
+    verifyError.verifyErrorInvalidIdType(response, INVALID_ID_DATA_TYPE);
+  }
+
+  @Test(description = "Update Book with mismatching ID")
+  public void testUpdateBookWithMisMatchingID() {
+    int idMismatch = (Integer) expectedBook.getId() + 1;
+    Book newBook = bookRepository.getFakeNewBook();
+    newBook.setId(expectedBook.getId());
+    String newBookJson = gson.toJson(newBook);
+
     booksRequests
-        .getBookById((Integer) expectedBook.getId())
+        .updateBook(idMismatch, newBookJson)
         .then()
-        .statusCode(HttpStatus.SC_NOT_FOUND);
+        .statusCode(HttpStatus.SC_BAD_REQUEST)
+        .extract()
+        .response();
   }
 
   @Test(
@@ -174,17 +272,14 @@ public class BooksTests extends BaseApiTest {
       dataProviderClass = DataProviderClass.class)
   public void testUpdateBookWithPageCount(
       Object pageCount, int expectedStatus, String description) {
-    // Book newBook = bookRepository.getFakeNewBook();
-    expectedBook.setPageCount(pageCount);
-    String newBookJson = gson.toJson(expectedBook);
+    Book book = bookRepository.getFakeNewBook();
+    book.setId(expectedBook.getId());
+    book.setPageCount(pageCount);
+    String newBookJson = gson.toJson(book);
     Response response =
-        booksRequests
-            .updateBook((Integer) expectedBook.getId(), newBookJson)
-            .then()
-            .extract()
-            .response();
+        booksRequests.updateBook(book.getId(), newBookJson).then().extract().response();
 
-    Assert.assertEquals(
+    assertEquals(
         response.statusCode(),
         expectedStatus,
         " Failed: Expected status "
@@ -194,18 +289,42 @@ public class BooksTests extends BaseApiTest {
             + ". Description: "
             + description);
     if (expectedStatus == HttpStatus.SC_BAD_REQUEST) {
-      Assert.assertEquals(
-          response.jsonPath().getString("title"), "One or more validation errors occurred.");
-      Assert.assertNotNull(response.jsonPath().get("traceId"));
-      Assert.assertTrue(
-          response.jsonPath().getMap("errors").containsKey("$.pageCount"),
-          "Error key for pageCount is missing");
-      String errorMessage = response.jsonPath().getString("errors.'$.pageCount'[0]");
-      Assert.assertTrue(
-          errorMessage.contains("The JSON value could not be converted to System.Int32"),
-          "Expected error message is missing or incorrect");
+      verifyError.verifyErrorInvalidPageCount(response);
     } else {
-      Assert.assertEquals(response.jsonPath().getInt("pageCount"), (Integer) pageCount);
+      assertEquals(response.jsonPath().getInt("pageCount"), (Integer) pageCount);
     }
+  }
+
+  @Test(description = "Delete book by ID")
+  public void testDeleteBookByID() {
+    booksRequests.deleteBook((Integer) expectedBook.getId()).then().statusCode(HttpStatus.SC_OK);
+    booksRequests
+        .getBookById((Integer) expectedBook.getId())
+        .then()
+        .statusCode(HttpStatus.SC_NOT_FOUND);
+  }
+
+  @Test(description = "Delete Book with NON-Existent ID")
+  public void testDeleteBookNonExistentID() {
+    Response response =
+        booksRequests
+            .deleteBook(NON_EXISTENT_ID)
+            .then()
+            .statusCode(HttpStatus.SC_NOT_FOUND)
+            .extract()
+            .response();
+    verifyError.verifyErrorNotFound(response);
+  }
+
+  @Test(description = "Delete Book with invalid Data type ID")
+  public void testDeleteBookInvalidDataTypeID() {
+    Response response =
+        booksRequests
+            .deleteBook(INVALID_ID_DATA_TYPE)
+            .then()
+            .statusCode(HttpStatus.SC_BAD_REQUEST)
+            .extract()
+            .response();
+    verifyError.verifyErrorInvalidIdType(response, INVALID_ID_DATA_TYPE);
   }
 }
