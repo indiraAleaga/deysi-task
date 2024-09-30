@@ -35,7 +35,7 @@ jobs:
         run: mvn clean install -DskipTests
 
       - name: Run Tests with TestNG
-        run: mvn test || true
+        run: mvn test
 
       - name: Generate Allure Report
         run: mvn allure:report || true
