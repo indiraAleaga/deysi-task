@@ -8,6 +8,6 @@ public class BaseApiTest {
     @BeforeClass
     public void setup() {
         RestAssured.baseURI = ConfigurationLoader.getProperty("baseUrl");
-    }
+   }
 }
 
