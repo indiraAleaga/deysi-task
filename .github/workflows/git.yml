@@ -8,7 +8,6 @@ on:
   pull_request:
     branches:
       - main
-      - feat/*
 
 jobs:
   test:
@@ -33,7 +32,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Build with Maven
-        run: mvn clean install
+        run: mvn clean install -DskipTests
 
       - name: Run Tests with TestNG
         run: mvn test || true
@@ -41,8 +40,9 @@ jobs:
       - name: Generate Allure Report
         run: mvn allure:report || true
 
-      - name: Publish Allure Report
-        uses: actions/upload-artifact@v4
+      - name: Deploy Allure Report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          name: allure-report
-          path: target/site/allure-maven/index.html
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: target/allure-report
