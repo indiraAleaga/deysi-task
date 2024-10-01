@@ -4,6 +4,11 @@ import com.api.test.models.Author;
 import com.github.javafaker.Faker;
 import java.util.List;
 
+/**
+ * The {@code AuthorRepository} class provides access to author data for testing purposes. This
+ * class is responsible for retrieving mock or predefined author information that can be used in
+ * test cases.
+ */
 public class AuthorRepository {
 
   private static final String DATA_URL = "data/authors/";

@@ -6,6 +6,35 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
+/**
+ * The {@code BaseRequest} class provides a generic mechanism to send HTTP requests using common
+ * HTTP methods such as GET, POST, PUT, and DELETE. It is designed to handle request creation and
+ * dispatch, including setting the appropriate HTTP method, endpoint, and request payload.
+ *
+ * <p>This class supports sending JSON data as the payload for POST and PUT requests, and handles
+ * path parameters in the URL for GET, PUT, and DELETE requests.
+ *
+ * <pre>
+ * Example usage:
+ * {@code
+ *   BaseRequest request = new BaseRequest();
+ *   Response response = request.sendRequest("/authors", "GET", null, null);
+ * }
+ * </pre>
+ *
+ * <p>This class is built on top of RestAssured, using {@code RequestSpecification} to configure and
+ * send the HTTP requests. It provides flexibility by allowing different HTTP methods to be
+ * specified dynamically at runtime.
+ *
+ * <p>The following HTTP methods are supported:
+ *
+ * <ul>
+ *   <li>GET
+ *   <li>POST
+ *   <li>PUT
+ *   <li>DELETE
+ * </ul>
+ */
 public class BaseRequest {
 
   protected static final String GET = "GET";
