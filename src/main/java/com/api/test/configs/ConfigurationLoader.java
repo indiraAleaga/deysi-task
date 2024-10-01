@@ -1,4 +1,4 @@
-package com.api.test.config;
+package com.api.test.configs;
 
 import java.io.IOException;
 import java.io.InputStream;
