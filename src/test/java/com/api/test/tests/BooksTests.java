@@ -4,10 +4,10 @@ import static com.api.test.constants.ApiTestsConstants.INVALID_ID_DATA_TYPE;
 import static com.api.test.constants.ApiTestsConstants.NON_EXISTENT_ID;
 import static org.testng.Assert.*;
 
-import com.api.test.data_provider.DataProviderClass;
+import com.api.test.data_providers.DataProviderClass;
 import com.api.test.models.Book;
-import com.api.test.repository.BooksRepository;
-import com.api.test.requests.BooksRequests;
+import com.api.test.repositories.BookRepository;
+import com.api.test.requests.BookRequests;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import java.util.Date;
@@ -17,30 +17,30 @@ import org.testng.annotations.Test;
 
 public class BooksTests extends BaseApiTest {
 
-  private BooksRequests booksRequests;
-  private BooksRepository bookRepository;
+  private BookRequests bookRequests;
+  private BookRepository bookRepository;
   private Book expectedBook;
 
   @BeforeClass
   public void beforeClass() {
 
-    bookRepository = new BooksRepository();
+    bookRepository = new BookRepository();
     bookRepository.loadBooks("books.json");
     expectedBook = bookRepository.getAllBooks().get(0);
-    booksRequests = new BooksRequests();
+    bookRequests = new BookRequests();
   }
 
   @Test(description = "Get all books")
   public void testGetAllBooks() {
     Response response =
-        booksRequests.getAllBooks().then().statusCode(HttpStatus.SC_OK).extract().response();
+        bookRequests.getAllBooks().then().statusCode(HttpStatus.SC_OK).extract().response();
     assertFalse(response.jsonPath().getList("id").isEmpty(), "Books list should not be empty");
   }
 
   @Test(description = "Get a book by ID")
   public void testGetBookById() {
     Book responseBook =
-        booksRequests
+        bookRequests
             .getBookById(expectedBook.getId())
             .then()
             .statusCode(HttpStatus.SC_OK)
@@ -74,7 +74,7 @@ public class BooksTests extends BaseApiTest {
   @Test(description = "Get a book by NON-Existent ID")
   public void testGetBookByIdNotFound() {
     Response response =
-        booksRequests
+        bookRequests
             .getBookById(NON_EXISTENT_ID)
             .then()
             .statusCode(HttpStatus.SC_NOT_FOUND)
@@ -86,7 +86,7 @@ public class BooksTests extends BaseApiTest {
   @Test(description = "Get a book by invalid ID data ype")
   public void testGetBookByInvalidIdDataType() {
     Response response =
-        booksRequests
+        bookRequests
             .getBookById(INVALID_ID_DATA_TYPE)
             .then()
             .statusCode(HttpStatus.SC_BAD_REQUEST)
@@ -99,32 +99,27 @@ public class BooksTests extends BaseApiTest {
   public void testCreateBookValid() {
     Book newBook = bookRepository.getFakeNewBook();
     String newBookJson = gson.toJson(newBook);
-    Response response = booksRequests.createBook(newBookJson).then().extract().response();
+    Response response = bookRequests.createBook(newBookJson).then().extract().response();
 
     assertEquals(response.statusCode(), HttpStatus.SC_OK); // HTTP 201 Created
     assertNotNull(response.jsonPath().getString("id"), "The bookId should not be empty");
 
     Book createdBook = response.as(Book.class);
     assertNotNull(createdBook, "Book not found in repository");
-    assertEquals(
-        createdBook.getId(),
-        expectedBook.getId(),
-        String.format(
-            "The expected book id is [%s], but we got [%s]",
-            expectedBook.getId(), createdBook.getId()));
+    assertNotNull(createdBook.getId(), "The book id should be generate");
     assertEquals(
         createdBook.getTitle(),
-        expectedBook.getTitle(),
+        newBook.getTitle(),
         String.format(
             "The expected title id is [%s], but we got [%s]",
-            expectedBook.getTitle(), createdBook.getTitle()));
+            newBook.getTitle(), createdBook.getTitle()));
     assertFalse(createdBook.getDescription().isEmpty(), "Book description should not be empty");
     assertEquals(
         createdBook.getPageCount(),
-        expectedBook.getPageCount(),
+        newBook.getPageCount(),
         String.format(
             "The expected page count id is [%s], but we got [%s]",
-            expectedBook.getPageCount(), createdBook.getPageCount()));
+            newBook.getPageCount(), createdBook.getPageCount()));
     assertFalse(createdBook.getExcerpt().isEmpty(), "Excerpt should not be empty");
     assertFalse(createdBook.getPublishDate().isEmpty(), "Publish date should not be empty");
   }
@@ -136,7 +131,7 @@ public class BooksTests extends BaseApiTest {
     Book newBook = bookRepository.getFakeNewBook();
     newBook.setId(existentID);
     String newBookJson = gson.toJson(newBook);
-    Response response = booksRequests.createBook(newBookJson).then().extract().response();
+    Response response = bookRequests.createBook(newBookJson).then().extract().response();
 
     assertEquals(response.statusCode(), HttpStatus.SC_BAD_REQUEST);
   }
@@ -147,7 +142,7 @@ public class BooksTests extends BaseApiTest {
     newBook.setPublishDate(new Date().toString());
     String newBookJson = gson.toJson(newBook);
     Response response =
-        booksRequests
+        bookRequests
             .createBook(newBookJson)
             .then()
             .assertThat()
@@ -168,7 +163,7 @@ public class BooksTests extends BaseApiTest {
     Book newBook = bookRepository.getFakeNewBook();
     newBook.setPageCount(pageCount);
     String newBookJson = gson.toJson(newBook);
-    Response response = booksRequests.createBook(newBookJson).then().extract().response();
+    Response response = bookRequests.createBook(newBookJson).then().extract().response();
 
     assertEquals(
         response.statusCode(),
@@ -193,7 +188,7 @@ public class BooksTests extends BaseApiTest {
     newBook.setId(expectedBook.getId());
     String newBookJson = gson.toJson(newBook);
     Book updatedBook =
-        booksRequests
+        bookRequests
             .updateBook(newBook.getId(), newBookJson)
             .then()
             .extract()
@@ -228,7 +223,7 @@ public class BooksTests extends BaseApiTest {
     Book newBook = bookRepository.getFakeNewBook();
     String newBookJson = gson.toJson(newBook);
     Response response =
-        booksRequests
+        bookRequests
             .updateBook(NON_EXISTENT_ID, newBookJson)
             .then()
             .statusCode(HttpStatus.SC_NOT_FOUND)
@@ -242,7 +237,7 @@ public class BooksTests extends BaseApiTest {
     Book newBook = bookRepository.getFakeNewBook();
     String newBookJson = gson.toJson(newBook);
     Response response =
-        booksRequests
+        bookRequests
             .updateBook(INVALID_ID_DATA_TYPE, newBookJson)
             .then()
             .statusCode(HttpStatus.SC_BAD_REQUEST)
@@ -258,7 +253,7 @@ public class BooksTests extends BaseApiTest {
     newBook.setId(expectedBook.getId());
     String newBookJson = gson.toJson(newBook);
 
-    booksRequests
+    bookRequests
         .updateBook(idMismatch, newBookJson)
         .then()
         .statusCode(HttpStatus.SC_BAD_REQUEST)
@@ -277,7 +272,7 @@ public class BooksTests extends BaseApiTest {
     book.setPageCount(pageCount);
     String newBookJson = gson.toJson(book);
     Response response =
-        booksRequests.updateBook(book.getId(), newBookJson).then().extract().response();
+        bookRequests.updateBook(book.getId(), newBookJson).then().extract().response();
 
     assertEquals(
         response.statusCode(),
@@ -297,14 +292,14 @@ public class BooksTests extends BaseApiTest {
 
   @Test(description = "Delete book by ID")
   public void testDeleteBookByID() {
-    booksRequests.deleteBook(expectedBook.getId()).then().statusCode(HttpStatus.SC_OK);
-    booksRequests.getBookById(expectedBook.getId()).then().statusCode(HttpStatus.SC_NOT_FOUND);
+    bookRequests.deleteBook(expectedBook.getId()).then().statusCode(HttpStatus.SC_OK);
+    bookRequests.getBookById(expectedBook.getId()).then().statusCode(HttpStatus.SC_NOT_FOUND);
   }
 
   @Test(description = "Delete Book with NON-Existent ID")
   public void testDeleteBookNonExistentID() {
     Response response =
-        booksRequests
+        bookRequests
             .deleteBook(NON_EXISTENT_ID)
             .then()
             .statusCode(HttpStatus.SC_NOT_FOUND)
@@ -316,7 +311,7 @@ public class BooksTests extends BaseApiTest {
   @Test(description = "Delete Book with invalid Data type ID")
   public void testDeleteBookInvalidDataTypeID() {
     Response response =
-        booksRequests
+        bookRequests
             .deleteBook(INVALID_ID_DATA_TYPE)
             .then()
             .statusCode(HttpStatus.SC_BAD_REQUEST)

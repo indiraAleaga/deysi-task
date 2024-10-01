@@ -4,7 +4,7 @@ import static com.api.test.constants.ApiTestsConstants.INVALID_ID_DATA_TYPE;
 import static com.api.test.constants.ApiTestsConstants.NON_EXISTENT_ID;
 
 import com.api.test.models.Author;
-import com.api.test.repository.AuthorRepository;
+import com.api.test.repositories.AuthorRepository;
 import com.api.test.requests.AuthorRequests;
 import io.restassured.response.Response;
 import org.apache.http.HttpStatus;

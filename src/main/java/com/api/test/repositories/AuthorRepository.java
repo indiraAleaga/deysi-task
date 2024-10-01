@@ -1,4 +1,4 @@
-package com.api.test.repository;
+package com.api.test.repositories;
 
 import com.api.test.models.Author;
 import com.fasterxml.jackson.core.type.TypeReference;

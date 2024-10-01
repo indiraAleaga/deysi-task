@@ -1,4 +1,4 @@
-package com.api.test.data_provider;
+package com.api.test.data_providers;
 
 import org.apache.http.HttpStatus;
 import org.testng.annotations.DataProvider;

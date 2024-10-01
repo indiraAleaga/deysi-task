@@ -1,4 +1,4 @@
-package com.api.test.repository;
+package com.api.test.repositories;
 
 import com.api.test.models.Book;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class BooksRepository {
+public class BookRepository {
   private static final String DATA_URL = "data/books/";
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final Faker faker = new Faker();

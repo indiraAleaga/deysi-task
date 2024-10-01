@@ -1,4 +1,4 @@
-package com.api.test.verification;
+package com.api.test.verifications;
 
 import static com.api.test.constants.ApiTestsConstants.*;
 import static org.testng.Assert.assertEquals;
