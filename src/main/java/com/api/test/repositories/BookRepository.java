@@ -8,6 +8,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * The {@code BookRepository} class provides access to author data for testing purposes. This class
+ * is responsible for retrieving mock or predefined author information that can be used in test
+ * cases.
+ */
 public class BookRepository {
   private static final String DATA_URL = "data/books/";
   private final LoadDataFromJson loadData = new LoadDataFromJson();
