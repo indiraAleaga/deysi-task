@@ -14,7 +14,7 @@ public class BooksRequests {
     return given().when().get(BOOKS_URL);
   }
 
-  public Response getBookById(int bookId) {
+  public Response getBookById(Object bookId) {
     return given()
         .contentType(ContentType.JSON)
         .when()
@@ -29,7 +29,7 @@ public class BooksRequests {
         .post(BOOKS_URL);
   }
 
-  public Response updateBook(int bookId, String jsonPayload) {
+  public Response updateBook(Object bookId, String jsonPayload) {
     return RestAssured.given()
         .contentType(ContentType.JSON)
         .body(jsonPayload)
@@ -37,7 +37,7 @@ public class BooksRequests {
         .put(String.format("%s/%s", BOOKS_URL, bookId));
   }
 
-  public Response deleteBook(int bookId) {
+  public Response deleteBook(Object bookId) {
     return RestAssured.given()
         .contentType(ContentType.JSON)
         .when()
