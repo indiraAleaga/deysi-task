@@ -35,6 +35,9 @@ public class BooksTests extends BaseApiTest {
     Response response =
         bookRequests.getAllBooks().then().statusCode(HttpStatus.SC_OK).extract().response();
     assertFalse(response.jsonPath().getList("id").isEmpty(), "Books list should not be empty");
+
+    int totalBooks = response.jsonPath().getList("id").size();
+    assertEquals(totalBooks, 200, "Total number of books should be 200");
   }
 
   @Test(description = "Get a book by ID")
@@ -133,7 +136,11 @@ public class BooksTests extends BaseApiTest {
     String newBookJson = gson.toJson(newBook);
     Response response = bookRequests.createBook(newBookJson).then().extract().response();
 
-    assertEquals(response.statusCode(), HttpStatus.SC_BAD_REQUEST);
+    assertEquals(
+        response.statusCode(),
+        HttpStatus.SC_BAD_REQUEST,
+        String.format(
+            "Expected %s status but got %s", HttpStatus.SC_BAD_REQUEST, response.statusCode()));
   }
 
   @Test(description = "Create a book invalid date format")
@@ -168,12 +175,10 @@ public class BooksTests extends BaseApiTest {
     assertEquals(
         response.statusCode(),
         expectedStatus,
-        " Failed: Expected status "
-            + expectedStatus
-            + ", but got "
-            + response.getStatusCode()
-            + ". Description: "
-            + description);
+        String.format(
+            "Failed: Expected status %d, but got %d. Description: %s",
+            expectedStatus, response.getStatusCode(), description));
+
     if (expectedStatus == HttpStatus.SC_BAD_REQUEST) {
       verifyError.verifyErrorInvalidPageCount(response);
 

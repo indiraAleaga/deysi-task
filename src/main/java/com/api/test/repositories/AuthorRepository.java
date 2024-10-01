@@ -1,30 +1,19 @@
 package com.api.test.repositories;
 
 import com.api.test.models.Author;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 public class AuthorRepository {
 
   private static final String DATA_URL = "data/authors/";
-  private final ObjectMapper objectMapper = new ObjectMapper();
   private final Faker faker = new Faker();
+
+  private final LoadDataFromJson loadData = new LoadDataFromJson();
   private List<Author> authors;
 
   public void loadAuthors(String resourceName) {
-    InputStream is =
-        getClass()
-            .getClassLoader()
-            .getResourceAsStream(String.format("%s%s", DATA_URL, resourceName));
-    try {
-      authors = objectMapper.readValue(is, new TypeReference<List<Author>>() {});
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    authors = loadData.loadObjects(String.format("%s/%s", DATA_URL, resourceName), Author.class);
   }
 
   public List<Author> getAllAuthors() {
