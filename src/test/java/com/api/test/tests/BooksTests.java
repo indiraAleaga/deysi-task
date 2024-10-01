@@ -41,7 +41,7 @@ public class BooksTests extends BaseApiTest {
   public void testGetBookById() {
     Book responseBook =
         booksRequests
-            .getBookById((Integer) expectedBook.getId())
+            .getBookById(expectedBook.getId())
             .then()
             .statusCode(HttpStatus.SC_OK)
             .extract()
@@ -297,11 +297,8 @@ public class BooksTests extends BaseApiTest {
 
   @Test(description = "Delete book by ID")
   public void testDeleteBookByID() {
-    booksRequests.deleteBook((Integer) expectedBook.getId()).then().statusCode(HttpStatus.SC_OK);
-    booksRequests
-        .getBookById((Integer) expectedBook.getId())
-        .then()
-        .statusCode(HttpStatus.SC_NOT_FOUND);
+    booksRequests.deleteBook(expectedBook.getId()).then().statusCode(HttpStatus.SC_OK);
+    booksRequests.getBookById(expectedBook.getId()).then().statusCode(HttpStatus.SC_NOT_FOUND);
   }
 
   @Test(description = "Delete Book with NON-Existent ID")

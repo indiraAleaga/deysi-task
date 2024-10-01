@@ -10,12 +10,9 @@ public final class ApiTestsConstants {
   public static final String ERROR_MESSAGE_TRACEID_KEY = "traceId";
   public static final String ERROR_MESSAGE_ERRORS_KEY = "errors";
   public static final String ERROR_MESSAGE_ID_KEY = "id";
-
   public static final String ERROR_MESSAGE_ID_BOOK_KEY = "$.idBook";
-
   public static final String ERROR_MESSAGE_PUBLISH_DATE_KEY = "$.publishDate";
   public static final String ERROR_MESSAGE_PAGE_COUNT_KEY = "$.pageCount";
-
   public static final String ERROR_MESSAGE_NOT_FOUND = "Not Found";
   public static final String ERROR_MESSAGE_NOT_VALID_VALUE = "The value '%s' is not valid.";
   public static final String ERROR_MESSAGE_COULD_NOT_CONVERT_SYSTEM32 =
